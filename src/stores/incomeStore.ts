@@ -39,17 +39,14 @@ export const useIncomeStore = defineStore("income", () => {
     loadingAllIncomes.value = true;
 
     try {
-      const response = await axios.get<Resp>(
-        "http://109.73.206.144:6969/api/incomes",
-        {
-          params: {
-            dateFrom: "2025-05-20",
-            dateTo: "2025-06-22",
-            page,
-            key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
-          },
-        }
-      );
+      const response = await axios.get<Resp>("/api/incomes", {
+        params: {
+          dateFrom: "2025-05-20",
+          dateTo: "2025-06-22",
+          page,
+          key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
+        },
+      });
       if (page === 1) {
         allIncomes.value = response.data.data;
         totalPagesAllIncomes.value = response.data.meta.last_page;
@@ -74,18 +71,15 @@ export const useIncomeStore = defineStore("income", () => {
     loadingIncomes.value = true;
 
     try {
-      const response = await axios.get<Resp>(
-        "http://109.73.206.144:6969/api/incomes",
-        {
-          params: {
-            dateFrom: "2025-05-20",
-            dateTo: "2025-06-22",
-            page,
-            key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
-            limit: 100,
-          },
-        }
-      );
+      const response = await axios.get<Resp>("/api/incomes", {
+        params: {
+          dateFrom: "2025-05-20",
+          dateTo: "2025-06-22",
+          page,
+          key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
+          limit: 100,
+        },
+      });
       allData.value = response.data;
       incomes.value = allData.value.data;
       currentPage.value = page;

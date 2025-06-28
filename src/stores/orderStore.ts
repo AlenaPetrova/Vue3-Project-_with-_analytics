@@ -39,17 +39,14 @@ export const useOrderStore = defineStore("order", () => {
     loadingAllOrders.value = true;
 
     try {
-      const response = await axios.get<Resp>(
-        "http://109.73.206.144:6969/api/orders",
-        {
-          params: {
-            dateFrom: "2025-06-20",
-            dateTo: "2025-06-22",
-            page,
-            key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
-          },
-        }
-      );
+      const response = await axios.get<Resp>("/api/orders", {
+        params: {
+          dateFrom: "2025-06-20",
+          dateTo: "2025-06-22",
+          page,
+          key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
+        },
+      });
       if (page === 1) {
         allOrders.value = response.data.data;
         totalPagesAllOrders.value = response.data.meta.last_page;
@@ -74,18 +71,15 @@ export const useOrderStore = defineStore("order", () => {
     loadingOrders.value = true;
 
     try {
-      const response = await axios.get<Resp>(
-        "http://109.73.206.144:6969/api/orders",
-        {
-          params: {
-            dateFrom: "2025-06-20",
-            dateTo: "2025-06-22",
-            page,
-            key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
-            limit: 100,
-          },
-        }
-      );
+      const response = await axios.get<Resp>("/api/orders", {
+        params: {
+          dateFrom: "2025-06-20",
+          dateTo: "2025-06-22",
+          page,
+          key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
+          limit: 100,
+        },
+      });
       allData.value = response.data;
       orders.value = allData.value.data;
       currentPage.value = page;

@@ -42,17 +42,14 @@ export const useStockStore = defineStore("stock", () => {
     loadingAllStocks.value = true;
 
     try {
-      const response = await axios.get<Resp>(
-        "http://109.73.206.144:6969/api/stocks",
-        {
-          params: {
-            dateFrom: todayStr,
-            dateTo: todayStr,
-            page,
-            key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
-          },
-        }
-      );
+      const response = await axios.get<Resp>("/api/stocks", {
+        params: {
+          dateFrom: todayStr,
+          dateTo: todayStr,
+          page,
+          key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
+        },
+      });
       if (page === 1) {
         allStocks.value = response.data.data;
         totalPagesAllStocks.value = response.data.meta.last_page;
@@ -77,18 +74,15 @@ export const useStockStore = defineStore("stock", () => {
     loadingStocks.value = true;
 
     try {
-      const response = await axios.get<Resp>(
-        "http://109.73.206.144:6969/api/stocks",
-        {
-          params: {
-            dateFrom: todayStr,
-            dateTo: todayStr,
-            page,
-            key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
-            limit: 100,
-          },
-        }
-      );
+      const response = await axios.get<Resp>("/api/stocks", {
+        params: {
+          dateFrom: todayStr,
+          dateTo: todayStr,
+          page,
+          key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
+          limit: 100,
+        },
+      });
       allData.value = response.data;
       stocks.value = allData.value.data;
       currentPage.value = page;
