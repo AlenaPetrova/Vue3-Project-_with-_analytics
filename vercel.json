@@ -6,6 +6,10 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=0; includeSubDomains"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "upgrade-insecure-requests: false"
         }
       ]
     }
@@ -17,6 +21,7 @@
     }
   ],
   "env": {
-    "HTTPS": "false"
+    "HTTPS": "false",
+    "VERCEL_FORCE_HTTPS": "false"
   }
 }
