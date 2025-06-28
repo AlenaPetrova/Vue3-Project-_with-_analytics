@@ -15,5 +15,8 @@
       "source": "/api/(.*)",
       "destination": "http://109.73.206.144:6969/api/$1"
     }
-  ]
+  ],
+  "env": {
+    "HTTPS": false
+  }
 }
