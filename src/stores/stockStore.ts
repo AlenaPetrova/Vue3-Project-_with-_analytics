@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref, type Ref } from "vue";
 import type { Stock, Resp } from "@/types";
 import axios from "axios";
-import { getTodayStr } from "@/composables/useDate";
+import { getTodayStr, getYesterdayStr } from "@/composables/useDate";
 
 export const useStockStore = defineStore("stock", () => {
   const resetData: Resp = {
@@ -36,6 +36,7 @@ export const useStockStore = defineStore("stock", () => {
   const totalPagesAllStocks = ref<number | null>(null);
 
   const todayStr = getTodayStr();
+  const yesterdayStr = getYesterdayStr();
 
   const fetchAllStocks = async (page = 1) => {
     error.value = null;
@@ -44,7 +45,7 @@ export const useStockStore = defineStore("stock", () => {
     try {
       const response = await axios.get<Resp>("/api/stocks", {
         params: {
-          dateFrom: todayStr,
+          dateFrom: yesterdayStr,
           dateTo: todayStr,
           page,
           key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
@@ -76,7 +77,7 @@ export const useStockStore = defineStore("stock", () => {
     try {
       const response = await axios.get<Resp>("/api/stocks", {
         params: {
-          dateFrom: todayStr,
+          dateFrom: yesterdayStr,
           dateTo: todayStr,
           page,
           key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
