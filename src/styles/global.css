@@ -5,7 +5,6 @@
 
   color: var(--color-black);
   background-color: var(--color-gray);
-  color-scheme: light dark;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -65,6 +64,7 @@ select,
 option {
   font-size: 1em;
   color: var(--color-white);
+  background-color: var(--color-black);
 }
 
 button {
