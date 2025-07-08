@@ -1,30 +1,31 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="wrapper">
+  <div class="container">
     <h1>Метрики заказов</h1>
 
-    <div class="indicator"><h2>Цена продажи</h2></div>
-    <div class="indicator"><h2>Размер скидки</h2></div>
-    <div class="indicator"><h2>Кол-во продаж</h2></div>
-    <div class="indicator"><h2>Кол-во отмен</h2></div>
+    <ul class="metrics-list">
+      <li class="metrics-item"><h2>Цена продажи</h2></li>
+      <li class="metrics-item"><h2>Размер скидки</h2></li>
+      <li class="metrics-item"><h2>Кол-во продаж</h2></li>
+      <li class="metrics-item"><h2>Кол-во отмен</h2></li>
+    </ul>
   </div>
 </template>
 
 <style scoped lang="scss">
-.wrapper {
-  padding: 2rem;
-  text-align: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  max-width: 100vw;
-}
+.metrics {
+  &-list {
+    text-align: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
 
-.indicator {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 50vw;
+  &-item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
 }
 </style>

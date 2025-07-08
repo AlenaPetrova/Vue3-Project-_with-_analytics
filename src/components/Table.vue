@@ -1,8 +1,19 @@
 <script setup lang="ts">
-defineProps<{
+const { to, columnNameWithId } = defineProps<{
   columns: { key: string; label: string }[];
   rows: Record<string, any>[];
+  clickable?: boolean;
+  to?: { name: string };
+  columnNameWithId?: string;
 }>();
+
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+const goToPage = (row: Record<string, string | number>) => {
+  if (!to || !columnNameWithId) return;
+  router.push({ ...to, params: { id: row[columnNameWithId] } });
+};
 </script>
 
 <template>
@@ -16,7 +27,12 @@ defineProps<{
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(row, idx) in rows" :key="row.id || idx">
+        <tr
+          v-for="(row, idx) in rows"
+          :key="row.id || idx"
+          @click="clickable ? goToPage(row) : null"
+          :class="{ clickable: clickable }"
+        >
           <td v-for="{ key } in columns" :key="key">
             {{ row[key] }}
           </td>
@@ -66,6 +82,14 @@ defineProps<{
   }
 
   tr {
+    &.clickable {
+      transition-duration: var(--transition-duration);
+      cursor: pointer;
+      &:hover {
+        background-color: var(--color-table-hover);
+      }
+    }
+
     &:nth-child(2n) {
       background-color: var(--color-white);
     }
