@@ -2,6 +2,7 @@
 import NavBar from "@/components/NavBar.vue";
 
 const paths = [
+  { text: "Main", path: "main" },
   { text: "Incomes", path: "incomes" },
   { text: "Orders", path: "orders" },
   { text: "Sales", path: "sales" },
