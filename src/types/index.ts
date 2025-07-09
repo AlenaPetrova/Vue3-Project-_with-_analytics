@@ -100,3 +100,16 @@ export interface Resp {
     total: number;
   };
 }
+
+export interface OrderMetrics {
+  nm_id: number;
+  prev: number;
+  current: number;
+  change: string;
+  svg?: number;
+}
+
+export interface OrderMetricsChart {
+  sumPrev: number;
+  sumCurrent: number;
+}
