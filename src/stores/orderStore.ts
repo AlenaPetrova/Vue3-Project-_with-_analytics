@@ -362,6 +362,7 @@ export const useOrderStore = defineStore("order", () => {
     currentPage,
     totalPages,
     goToPage,
+    allArticles,
     salesMetrics,
     sortedDescChangeSalesMetrics,
     topSalesMetrics,

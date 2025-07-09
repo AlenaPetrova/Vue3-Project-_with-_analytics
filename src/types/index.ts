@@ -113,3 +113,23 @@ export interface OrderMetricsChart {
   sumPrev: number;
   sumCurrent: number;
 }
+
+export interface Article {
+  nm_id: number;
+  name: string;
+  brand: string;
+  category: string;
+  img: string;
+  date: string;
+  size: string;
+  count: number;
+  price: number;
+}
+
+export interface ArticleMetrics {
+  name: string;
+  prev: number;
+  current: number;
+  change: string;
+  svg?: number;
+}
