@@ -1,10 +1,15 @@
 <script setup lang="ts">
+import arrow from "@/assets/arrow.svg";
+import arrowUp from "@/assets/arrowUp.svg";
+import arrowDown from "@/assets/arrowDown.svg";
+
 const { to, columnNameWithId } = defineProps<{
   columns: { key: string; label: string }[];
   rows: Record<string, any>[];
   clickable?: boolean;
   to?: { name: string };
   columnNameWithId?: string;
+  showSvg?: boolean;
 }>();
 
 import { useRouter } from "vue-router";
@@ -24,6 +29,7 @@ const goToPage = (row: Record<string, string | number>) => {
           <th v-for="{ key, label } in columns" :key="key">
             {{ label }}
           </th>
+          <th v-if="showSvg"></th>
         </tr>
       </thead>
       <tbody>
@@ -35,6 +41,11 @@ const goToPage = (row: Record<string, string | number>) => {
         >
           <td v-for="{ key } in columns" :key="key">
             {{ row[key] }}
+          </td>
+          <td v-if="showSvg">
+            <img v-if="row.svg === 1" :src="arrowUp" alt="arrow up" />
+            <img v-if="row.svg === -1" :src="arrowDown" alt="arrow down" />
+            <img v-if="row.svg === 0" :src="arrow" alt="arrow" />
           </td>
         </tr>
       </tbody>
