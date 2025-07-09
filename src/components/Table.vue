@@ -101,6 +101,9 @@ const goToPage = (row: Record<string, string | number>) => {
       }
     }
 
+    &:nth-child(n) {
+      background-color: var(--color-gray);
+    }
     &:nth-child(2n) {
       background-color: var(--color-white);
     }
