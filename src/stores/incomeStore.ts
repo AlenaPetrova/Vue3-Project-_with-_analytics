@@ -99,6 +99,8 @@ export const useIncomeStore = defineStore("income", () => {
     });
   };
 
+  const resetFilter = (): void => goToPage(1);
+
   const goToPage = (page: number) => {
     if (page > 0 && page <= totalPages.value) {
       fetchIncomes(page);
@@ -115,6 +117,7 @@ export const useIncomeStore = defineStore("income", () => {
     fetchIncomes,
     fetchAllIncomes,
     filterAllIncomes,
+    resetFilter,
     currentPage,
     totalPages,
     goToPage,

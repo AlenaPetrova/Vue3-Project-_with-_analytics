@@ -17,7 +17,7 @@ const {
   currentPage,
   totalPages,
 } = storeToRefs(incomeStore);
-const { fetchIncomes, fetchAllIncomes, filterAllIncomes, goToPage } =
+const { fetchIncomes, fetchAllIncomes, filterAllIncomes, goToPage, resetFilter } =
   incomeStore;
 
 onMounted(async () => {
@@ -57,7 +57,7 @@ const selectedCategories = ref(["barcode", "warehouse_name"]);
       <Filter
         :table-categories="selectedCategories"
         :get-filter-data="filterAllIncomes"
-        :go-to-page="goToPage"
+        :reset-filter="resetFilter"
       />
 
       <Table :columns="incomeColumns" :rows="incomes" />

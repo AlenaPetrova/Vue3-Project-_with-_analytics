@@ -102,6 +102,8 @@ export const useStockStore = defineStore("stock", () => {
     });
   };
 
+  const resetFilter = (): void => goToPage(1);
+
   const goToPage = (page: number) => {
     if (page > 0 && page <= totalPages.value) {
       fetchStocks(page);
@@ -118,6 +120,7 @@ export const useStockStore = defineStore("stock", () => {
     fetchStocks,
     fetchAllStocks,
     filterAllStocks,
+    resetFilter,
     currentPage,
     totalPages,
     goToPage,

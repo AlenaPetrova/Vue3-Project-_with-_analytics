@@ -157,6 +157,9 @@ export const useOrderStore = defineStore("order", () => {
     });
   };
 
+  const resetFilter = (): void => goToPage(1);
+  const resetMetricsFilter = (): void => {};
+
   const goToPage = (page: number): void => {
     if (page > 0 && page <= totalPages.value) {
       fetchOrders(page);
@@ -359,6 +362,8 @@ export const useOrderStore = defineStore("order", () => {
     fetchOrders,
     fetchAllOrders,
     filterAllOrders,
+    resetFilter,
+    resetMetricsFilter,
     currentPage,
     totalPages,
     goToPage,

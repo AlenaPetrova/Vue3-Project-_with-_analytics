@@ -17,7 +17,8 @@ const {
   currentPage,
   totalPages,
 } = storeToRefs(saleStore);
-const { fetchSales, fetchAllSales, filterAllSales, goToPage } = saleStore;
+const { fetchSales, fetchAllSales, filterAllSales, goToPage, resetFilter } =
+  saleStore;
 
 onMounted(async () => {
   fetchSales(1);
@@ -56,7 +57,7 @@ const selectedCategories = ref(["barcode", "brand"]);
       <Filter
         :table-categories="selectedCategories"
         :get-filter-data="filterAllSales"
-        :go-to-page="goToPage"
+        :reset-filter="resetFilter"
       />
 
       <Table :columns="saleColumns" :rows="sales" />

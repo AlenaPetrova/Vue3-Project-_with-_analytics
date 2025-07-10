@@ -17,7 +17,8 @@ const {
   currentPage,
   totalPages,
 } = storeToRefs(orderStore);
-const { fetchOrders, fetchAllOrders, filterAllOrders, goToPage } = orderStore;
+const { fetchOrders, fetchAllOrders, filterAllOrders, goToPage, resetFilter } =
+  orderStore;
 
 onMounted(async () => {
   fetchOrders(1);
@@ -31,17 +32,6 @@ const orderColumns = computed(() => {
     label: key,
   }));
 });
-
-//Пример переименования столбцов таблицы, если это необходимо
-// const orderColumns = [
-//   { key: "brand", label: "Бренд" },
-//   { key: "category", label: "Категория" },
-//   { key: "discount_percent", label: "Скидка (%)" },
-//   { key: "oblast", label: "Область" },
-//   { key: "subject", label: "Предмет" },
-//   { key: "warehouse_name", label: "Склад" },
-//   { key: "total_price", label: "Цена" },
-// ];
 
 const selectedCategories = ref(["barcode", "brand"]);
 </script>
@@ -67,7 +57,7 @@ const selectedCategories = ref(["barcode", "brand"]);
       <Filter
         :table-categories="selectedCategories"
         :get-filter-data="filterAllOrders"
-        :go-to-page="goToPage"
+        :reset-filter="resetFilter"
       />
 
       <Table :columns="orderColumns" :rows="orders" />

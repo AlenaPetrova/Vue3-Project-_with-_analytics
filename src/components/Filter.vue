@@ -4,7 +4,7 @@ import { ref } from "vue";
 const props = defineProps<{
   tableCategories: string[];
   getFilterData: (field: any, value: string) => void;
-  goToPage: (page: number) => void;
+  resetFilter: () => void;
 }>();
 
 const selected = ref("");
@@ -13,7 +13,7 @@ const value = ref("");
 const clearFilter = () => {
   selected.value = "";
   value.value = "";
-  props.goToPage(1);
+  props.resetFilter();
 };
 </script>
 
