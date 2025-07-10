@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useIncomeStore } from "@/stores/incomeStore";
 import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
@@ -17,8 +17,13 @@ const {
   currentPage,
   totalPages,
 } = storeToRefs(incomeStore);
-const { fetchIncomes, fetchAllIncomes, filterAllIncomes, goToPage, resetFilter } =
-  incomeStore;
+const {
+  fetchIncomes,
+  fetchAllIncomes,
+  filterAllIncomes,
+  goToPage,
+  resetFilter,
+} = incomeStore;
 
 onMounted(async () => {
   fetchIncomes(1);
@@ -33,7 +38,10 @@ const incomeColumns = computed(() => {
   }));
 });
 
-const selectedCategories = ref(["barcode", "warehouse_name"]);
+const selectedCategories = [
+  { key: "barcode", label: "Штрихкод" },
+  { key: "warehouse_name", label: "Название склада" },
+];
 </script>
 
 <template>

@@ -4,6 +4,7 @@ import { useOrderStore } from "@/stores/orderStore";
 import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
 import ChartMetrics from "@/components/ChartMetrics.vue";
+import Filter from "@/components/Filter.vue";
 
 const orderStore = useOrderStore();
 const {
@@ -13,7 +14,8 @@ const {
   loadingAllOrders,
   error,
 } = storeToRefs(orderStore);
-const { fetchOrders, fetchAllOrders } = orderStore;
+const { fetchOrders, fetchAllOrders, resetMetricsFilter, filterOrdersMetrics } =
+  orderStore;
 
 onMounted(async () => {
   fetchOrders(1);
@@ -30,6 +32,14 @@ const routingColumnName = "nm_id";
 const to = { name: "article" };
 
 const chartColumnsame = ["Предыдущая неделя", "Текущая неделя"];
+
+const selectedCategories = [
+  { key: "nm_id", label: "Артикул" },
+  { key: "category", label: "Категория" },
+  { key: "brand", label: "Бренд" },
+  { key: "oblast", label: "Регион" },
+  { key: "date", label: "Дата (yyyy-mm-dd)" },
+];
 </script>
 
 <template>
@@ -48,6 +58,13 @@ const chartColumnsame = ["Предыдущая неделя", "Текущая н
         title=""
         title-x="Период"
         title-y="Средняя цена"
+      />
+
+      <Filter
+        v-if="!loadingOrders"
+        :table-categories="selectedCategories"
+        :get-filter-data="filterOrdersMetrics"
+        :reset-filter="resetMetricsFilter"
       />
 
       <h2 v-if="loadingOrders || !totalPriceMetrics.length">

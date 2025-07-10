@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted } from "vue";
 import { useStockStore } from "@/stores/stockStore";
 import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
@@ -33,7 +33,10 @@ const stockColumns = computed(() => {
   }));
 });
 
-const selectedCategories = ref(["barcode", "brand"]);
+const selectedCategories = [
+  { key: "barcode", label: "Штрихкод" },
+  { key: "brand", label: "Бренд" },
+];
 </script>
 
 <template>

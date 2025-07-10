@@ -156,6 +156,7 @@ export const useOrderStore = defineStore("order", () => {
       return item[field] === Number(value);
     });
   };
+  const filterOrdersMetrics = (field: keyof Order, value: string): void => {};
 
   const resetFilter = (): void => goToPage(1);
   const resetMetricsFilter = (): void => {};
@@ -362,6 +363,7 @@ export const useOrderStore = defineStore("order", () => {
     fetchOrders,
     fetchAllOrders,
     filterAllOrders,
+    filterOrdersMetrics,
     resetFilter,
     resetMetricsFilter,
     currentPage,

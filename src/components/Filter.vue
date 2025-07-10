@@ -2,7 +2,7 @@
 import { ref } from "vue";
 
 const props = defineProps<{
-  tableCategories: string[];
+  tableCategories: { key: string; label: string }[];
   getFilterData: (field: any, value: string) => void;
   resetFilter: () => void;
 }>();
@@ -20,18 +20,14 @@ const clearFilter = () => {
 <template>
   <div class="filter-wrapper">
     <select v-model="selected" class="filter-select">
-      <option disabled value="">Select category to filter</option>
-      <option
-        v-for="category in tableCategories"
-        :key="category"
-        :value="category"
-      >
-        {{ category }}
+      <option disabled value="">Выберите категорию фильтрации</option>
+      <option v-for="{ key, label } in tableCategories" :key="key" :value="key">
+        {{ label }}
       </option>
     </select>
     <input
       v-model="value"
-      placeholder="Enter name/number..."
+      placeholder="Введите значение категории..."
       type="text"
       class="filter-input"
     />
