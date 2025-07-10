@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { useOrderStore } from "@/stores/orderStore";
 import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
@@ -9,7 +9,7 @@ import { getPrevPeriod, getCurrPeriod } from "@/composables/useDate";
 
 const orderStore = useOrderStore();
 const {
-  salesMetrics,
+  filterSalesMatrics,
   sumSalesMetrics,
   loadingOrders,
   loadingAllOrders,
@@ -21,6 +21,9 @@ const { fetchOrders, fetchAllOrders, resetMetricsFilter, filterOrdersMetrics } =
 onMounted(async () => {
   fetchOrders(1);
   fetchAllOrders();
+});
+onUnmounted(() => {
+  filterSalesMatrics.value = [];
 });
 
 const tableColumnsName = [
@@ -61,21 +64,22 @@ const selectedCategories = [
         title-y="Кол-во продаж"
       />
 
+      <h2 v-if="error"></h2>
       <Filter
-        v-if="!loadingOrders"
+        v-else-if="!loadingOrders"
         :table-categories="selectedCategories"
         :get-filter-data="filterOrdersMetrics"
         :reset-filter="resetMetricsFilter"
       />
 
-      <h2 v-if="loadingOrders || salesMetrics === null">
+      <h2 v-if="loadingOrders || !filterSalesMatrics.length">
         Загрузка данных для таблицы...
       </h2>
       <h2 v-else-if="error">{{ error }}</h2>
       <Table
         v-else
         :columns="tableColumnsName"
-        :rows="salesMetrics"
+        :rows="filterSalesMatrics"
         clickable
         :to="to"
         :column-name-with-id="routingColumnName"

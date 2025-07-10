@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { useOrderStore } from "@/stores/orderStore";
 import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
@@ -11,12 +11,16 @@ const orderStore = useOrderStore();
 const {
   topSalesMetrics,
   sumSalesMetrics,
+  filterSalesMatrics,
   topCancelMetrics,
   sumCancelMetrics,
+  filterCancelMatrics,
   topDiscPercentMetrics,
   sumDiscPercentMetrics,
+  filterDiscPercentMatrics,
   topTotalPriceMetrics,
   sumTotalPriceMetrics,
+  filterTotalPriceMatrics,
   loadingOrders,
   loadingAllOrders,
   error,
@@ -27,6 +31,12 @@ const { fetchOrders, fetchAllOrders, resetMetricsFilter, filterOrdersMetrics } =
 onMounted(async () => {
   fetchOrders(1);
   fetchAllOrders();
+});
+onUnmounted(() => {
+  filterTotalPriceMatrics.value = [];
+  filterDiscPercentMatrics.value = [];
+  filterSalesMatrics.value = [];
+  filterCancelMatrics.value = [];
 });
 
 const tableColumnsName = [
@@ -54,8 +64,9 @@ const selectedCategories = [
     <h1>Метрики заказов</h1>
 
     <div class="wrapper">
+      <h2 v-if="error">{{ error }}</h2>
       <Filter
-        v-if="!loadingOrders"
+        v-else-if="!loadingOrders"
         :table-categories="selectedCategories"
         :get-filter-data="filterOrdersMetrics"
         :reset-filter="resetMetricsFilter"
@@ -68,7 +79,7 @@ const selectedCategories = [
           >
             Загрузка данных для графика...
           </h2>
-          <h2 v-else-if="error">{{ error }}</h2>
+          <h2 v-else-if="error"></h2>
           <RouterLink v-else :to="{ name: 'totalprice' }"
             ><ChartMetrics
               :obj="sumTotalPriceMetrics"
@@ -81,7 +92,7 @@ const selectedCategories = [
           <h2 v-if="loadingOrders || !topTotalPriceMetrics.length">
             Загрузка данных для таблицы...
           </h2>
-          <h2 v-else-if="error">{{ error }}</h2>
+          <h2 v-else-if="error"></h2>
           <Table
             v-else
             :columns="tableColumnsName"
@@ -100,7 +111,7 @@ const selectedCategories = [
           >
             Загрузка данных для графика...
           </h2>
-          <h2 v-else-if="error">{{ error }}</h2>
+          <h2 v-else-if="error"></h2>
           <RouterLink v-else :to="{ name: 'discountrcent' }">
             <ChartMetrics
               :obj="sumDiscPercentMetrics"
@@ -114,7 +125,7 @@ const selectedCategories = [
           <h2 v-if="loadingOrders || !topDiscPercentMetrics.length">
             Загрузка данных для таблицы...
           </h2>
-          <h2 v-else-if="error">{{ error }}</h2>
+          <h2 v-else-if="error"></h2>
           <Table
             v-else
             :columns="tableColumnsName"
@@ -129,7 +140,7 @@ const selectedCategories = [
           <h2 v-if="loadingAllOrders || !Object.keys(sumSalesMetrics).length">
             Загрузка данных для графика...
           </h2>
-          <h2 v-else-if="error">{{ error }}</h2>
+          <h2 v-else-if="error"></h2>
           <RouterLink v-else :to="{ name: 'numofsales' }">
             <ChartMetrics
               :obj="sumSalesMetrics"
@@ -143,7 +154,7 @@ const selectedCategories = [
           <h2 v-if="loadingOrders || !topSalesMetrics.length">
             Загрузка данных для таблицы...
           </h2>
-          <h2 v-else-if="error">{{ error }}</h2>
+          <h2 v-else-if="error"></h2>
           <Table
             v-else
             :columns="tableColumnsName"
@@ -158,7 +169,7 @@ const selectedCategories = [
           <h2 v-if="loadingAllOrders || !Object.keys(sumCancelMetrics).length">
             Загрузка данных для графика...
           </h2>
-          <h2 v-else-if="error">{{ error }}</h2>
+          <h2 v-else-if="error"></h2>
           <RouterLink v-else :to="{ name: 'numofcancel' }">
             <ChartMetrics
               :obj="sumCancelMetrics"
@@ -172,7 +183,7 @@ const selectedCategories = [
           <h2 v-if="loadingOrders || !topCancelMetrics.length">
             Загрузка данных для таблицы...
           </h2>
-          <h2 v-else-if="error">{{ error }}</h2>
+          <h2 v-else-if="error"></h2>
           <Table
             v-else
             :columns="tableColumnsName"

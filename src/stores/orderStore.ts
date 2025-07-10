@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, ref, type ComputedRef, type Ref } from "vue";
+import { computed, ref, watch, type Ref } from "vue";
 import type { Order, OrderMetrics, OrderMetricsChart, Resp } from "@/types";
 import axios from "axios";
 import {
@@ -45,6 +45,11 @@ export const useOrderStore = defineStore("order", () => {
   const startCurrPeriod = getWeekAgoStr();
   const endCurrPeriod = getYesterdayStr();
 
+  const filterTotalPriceMatrics: Ref<OrderMetrics[]> = ref([]);
+  const filterDiscPercentMatrics: Ref<OrderMetrics[]> = ref([]);
+  const filterSalesMatrics: Ref<OrderMetrics[]> = ref([]);
+  const filterCancelMatrics: Ref<OrderMetrics[]> = ref([]);
+
   const prevPeriod = computed(() => getPeriod(startPrevPeriod, endPrevPeriod));
   const currPeriod = computed(() => getPeriod(startCurrPeriod, endCurrPeriod));
 
@@ -54,58 +59,46 @@ export const useOrderStore = defineStore("order", () => {
 
   const salesMetrics = computed(() => getMetrics("is_cancel", false));
   const sortedDescChangeSalesMetrics = computed(() =>
-    sortedMetrics(salesMetrics as ComputedRef<OrderMetrics[]>, "change", "desc")
+    sortedMetrics(filterSalesMatrics.value, "change", "desc")
   );
   const topSalesMetrics = computed(() =>
-    getTopMetrics(sortedDescChangeSalesMetrics, 10)
+    getTopMetrics(sortedDescChangeSalesMetrics.value, 10)
   );
   const sumSalesMetrics = computed(() =>
-    getSumMetrics(salesMetrics as ComputedRef<OrderMetrics[]>)
+    getSumMetrics(salesMetrics.value as OrderMetrics[])
   );
 
   const cancelMetrics = computed(() => getMetrics("is_cancel", true));
   const sortedDescChangeCancelMetrics = computed(() =>
-    sortedMetrics(
-      cancelMetrics as ComputedRef<OrderMetrics[]>,
-      "change",
-      "desc"
-    )
+    sortedMetrics(filterCancelMatrics.value, "change", "desc")
   );
   const topCancelMetrics = computed(() =>
-    getTopMetrics(sortedDescChangeCancelMetrics, 10)
+    getTopMetrics(sortedDescChangeCancelMetrics.value, 10)
   );
   const sumCancelMetrics = computed(() =>
-    getSumMetrics(cancelMetrics as ComputedRef<OrderMetrics[]>)
+    getSumMetrics(cancelMetrics.value as OrderMetrics[])
   );
 
   const discPercentMetrics = computed(() => getMetrics("discount_percent"));
   const sortedDescChangeDiscPercentMetrics = computed(() =>
-    sortedMetrics(
-      discPercentMetrics as ComputedRef<OrderMetrics[]>,
-      "change",
-      "desc"
-    )
+    sortedMetrics(filterDiscPercentMatrics.value, "change", "desc")
   );
   const topDiscPercentMetrics = computed(() =>
-    getTopMetrics(sortedDescChangeDiscPercentMetrics, 10)
+    getTopMetrics(sortedDescChangeDiscPercentMetrics.value, 10)
   );
   const sumDiscPercentMetrics = computed(() =>
-    getMeanSumMetrics(discPercentMetrics as ComputedRef<OrderMetrics[]>)
+    getMeanSumMetrics(discPercentMetrics.value as OrderMetrics[])
   );
 
   const totalPriceMetrics = computed(() => getMetrics("total_price"));
   const sortedDescChangeTotalPriceMetrics = computed(() =>
-    sortedMetrics(
-      totalPriceMetrics as ComputedRef<OrderMetrics[]>,
-      "change",
-      "desc"
-    )
+    sortedMetrics(filterTotalPriceMatrics.value, "change", "desc")
   );
   const topTotalPriceMetrics = computed(() =>
-    getTopMetrics(sortedDescChangeTotalPriceMetrics, 10)
+    getTopMetrics(sortedDescChangeTotalPriceMetrics.value, 10)
   );
   const sumTotalPriceMetrics = computed(() =>
-    getMeanSumMetrics(totalPriceMetrics as ComputedRef<OrderMetrics[]>)
+    getMeanSumMetrics(totalPriceMetrics.value as OrderMetrics[])
   );
 
   const fetchAllOrders = async (page = 1) => {
@@ -172,10 +165,44 @@ export const useOrderStore = defineStore("order", () => {
       return item[field] === Number(value);
     });
   };
-  const filterOrdersMetrics = (field: keyof Order, value: string): void => {};
+
+  const filterOrdersMetrics = (field: keyof Order, value: string): void => {
+    const findIdByFilter = (): number[] | null => {
+      const orders = allOrders.value.filter((item) => {
+        if (typeof item[field] === "string")
+          return item[field].toLowerCase().includes(value.toLowerCase());
+        return item[field]?.toString().includes(value);
+      });
+      return orders.length ? orders.map((item) => item.nm_id) : null;
+    };
+
+    const filteredMetricsById = (metrics: OrderMetrics[]): OrderMetrics[] => {
+      const nm_ids = findIdByFilter();
+      if (!nm_ids) return [];
+      return metrics.filter((item) => nm_ids.includes(item.nm_id));
+    };
+
+    filterTotalPriceMatrics.value = filteredMetricsById(
+      totalPriceMetrics.value as OrderMetrics[]
+    );
+    filterDiscPercentMatrics.value = filteredMetricsById(
+      discPercentMetrics.value as OrderMetrics[]
+    );
+    filterSalesMatrics.value = filteredMetricsById(
+      salesMetrics.value as OrderMetrics[]
+    );
+    filterCancelMatrics.value = filteredMetricsById(
+      cancelMetrics.value as OrderMetrics[]
+    );
+  };
 
   const resetFilter = (): void => goToPage(1);
-  const resetMetricsFilter = (): void => {};
+  const resetMetricsFilter = (): void => {
+    filterTotalPriceMatrics.value = totalPriceMetrics.value as OrderMetrics[];
+    filterDiscPercentMatrics.value = discPercentMetrics.value as OrderMetrics[];
+    filterSalesMatrics.value = salesMetrics.value as OrderMetrics[];
+    filterCancelMatrics.value = cancelMetrics.value as OrderMetrics[];
+  };
 
   const goToPage = (page: number): void => {
     if (page > 0 && page <= totalPages.value) {
@@ -325,57 +352,88 @@ export const useOrderStore = defineStore("order", () => {
   };
 
   const sortedMetrics = (
-    arrMetrics: ComputedRef<OrderMetrics[]>,
+    arrMetrics: OrderMetrics[],
     field: keyof Omit<OrderMetrics, "svg">,
     type: "asc" | "desc"
   ): OrderMetrics[] => {
     if (type === "asc")
-      return [...arrMetrics.value].sort((a, b) => {
+      return [...arrMetrics].sort((a, b) => {
         if (field === "change") return parseInt(a[field]) - parseInt(b[field]);
         else return a[field] - b[field];
       });
     else
-      return [...arrMetrics.value].sort((a, b) => {
+      return [...arrMetrics].sort((a, b) => {
         if (field === "change") return parseInt(b[field]) - parseInt(a[field]);
         else return b[field] - a[field];
       });
   };
 
   const getTopMetrics = (
-    arrMetrics: ComputedRef<OrderMetrics[]>,
+    arrMetrics: OrderMetrics[],
     count: number
-  ): OrderMetrics[] => [...arrMetrics.value].slice(0, count);
+  ): OrderMetrics[] => [...arrMetrics].slice(0, count);
 
-  const getSumMetrics = (
-    arrMetrics: ComputedRef<OrderMetrics[]>
-  ): OrderMetricsChart => {
-    const sumPrev = arrMetrics.value.reduce(
-      (acc, order) => acc + order.prev,
-      0
-    );
-    const sumCurrent = arrMetrics.value.reduce(
+  const getSumMetrics = (arrMetrics: OrderMetrics[]): OrderMetricsChart => {
+    const sumPrev = arrMetrics.reduce((acc, order) => acc + order.prev, 0);
+    const sumCurrent = arrMetrics.reduce(
       (acc, order) => acc + order.current,
       0
     );
     return { sumPrev, sumCurrent };
   };
 
-  const getMeanSumMetrics = (
-    arrMetrics: ComputedRef<OrderMetrics[]>
-  ): OrderMetricsChart => {
-    const prev = arrMetrics.value.reduce((acc, order) => acc + order.prev, 0);
-    const prevCount = arrMetrics.value.length;
+  const getMeanSumMetrics = (arrMetrics: OrderMetrics[]): OrderMetricsChart => {
+    const prev = arrMetrics.reduce((acc, order) => acc + order.prev, 0);
+    const prevCount = arrMetrics.length;
     const sumPrev = Math.round(prev / prevCount);
 
-    const current = arrMetrics.value.reduce(
-      (acc, order) => acc + order.current,
-      0
-    );
-    const currentCount = arrMetrics.value.length;
+    const current = arrMetrics.reduce((acc, order) => acc + order.current, 0);
+    const currentCount = arrMetrics.length;
     const sumCurrent = Math.round(current / currentCount);
 
     return { sumPrev, sumCurrent };
   };
+
+  watch(
+    totalPriceMetrics,
+    (newVal) => {
+      if (newVal && newVal.length) {
+        filterTotalPriceMatrics.value = newVal;
+      }
+    },
+    { immediate: true }
+  );
+
+  watch(
+    discPercentMetrics,
+    (newVal) => {
+      if (newVal && newVal.length) {
+        filterDiscPercentMatrics.value = newVal;
+      }
+    },
+    { immediate: true }
+  );
+
+  watch(
+    salesMetrics,
+    (newVal) => {
+      if (newVal && newVal.length) {
+        filterSalesMatrics.value = newVal;
+      }
+    },
+    { immediate: true }
+  );
+
+  watch(
+    cancelMetrics,
+    (newVal) => {
+      if (newVal && newVal.length) {
+        filterCancelMatrics.value = newVal;
+      }
+    },
+    { immediate: true }
+  );
+
   return {
     allData,
     orders,
@@ -397,17 +455,21 @@ export const useOrderStore = defineStore("order", () => {
     sortedDescChangeSalesMetrics,
     topSalesMetrics,
     sumSalesMetrics,
+    filterSalesMatrics,
     cancelMetrics,
     sortedDescChangeCancelMetrics,
     topCancelMetrics,
     sumCancelMetrics,
+    filterCancelMatrics,
     discPercentMetrics,
     sortedDescChangeDiscPercentMetrics,
     topDiscPercentMetrics,
     sumDiscPercentMetrics,
+    filterDiscPercentMatrics,
     totalPriceMetrics,
     sortedDescChangeTotalPriceMetrics,
     topTotalPriceMetrics,
     sumTotalPriceMetrics,
+    filterTotalPriceMatrics,
   };
 });

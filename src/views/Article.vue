@@ -15,8 +15,6 @@ const nm_id = computed(() => +params.id);
 const article = computed(() => getArticle(nm_id.value, "order"));
 const metrics = computed(() => getArticleMetrics(nm_id.value, "order"));
 
-console.log(metrics.value);
-
 const tableColumnsName = [
   { key: "name", label: "Показатель" },
   { key: "prev", label: `${getPrevPeriod()}` },
