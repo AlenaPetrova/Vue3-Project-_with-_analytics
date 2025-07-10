@@ -1,5 +1,5 @@
 import { defineStore, storeToRefs } from "pinia";
-import { computed } from "vue";
+import { computed, type ComputedRef } from "vue";
 import type { Article, ArticleMetrics, OrderMetrics } from "@/types";
 import { useOrderStore } from "@/stores/orderStore";
 
@@ -54,14 +54,18 @@ export const useArticleStore = defineStore("article", () => {
     };
 
     if (storeName === "order") {
-      const objPrice = totalPriceMetrics.value.find(
+      const objPrice = (
+        totalPriceMetrics as ComputedRef<OrderMetrics[]>
+      ).value.find((obj) => obj.nm_id === nm_id);
+      const objDiscount = (
+        discPercentMetrics as ComputedRef<OrderMetrics[]>
+      ).value.find((obj) => obj.nm_id === nm_id);
+      const objSale = (salesMetrics as ComputedRef<OrderMetrics[]>).value.find(
         (obj) => obj.nm_id === nm_id
       );
-      const objDiscount = discPercentMetrics.value.find(
-        (obj) => obj.nm_id === nm_id
-      );
-      const objSale = salesMetrics.value.find((obj) => obj.nm_id === nm_id);
-      const objCancel = cancelMetrics.value.find((obj) => obj.nm_id === nm_id);
+      const objCancel = (
+        cancelMetrics as ComputedRef<OrderMetrics[]>
+      ).value.find((obj) => obj.nm_id === nm_id);
 
       return [
         transformMetric(objPrice as OrderMetrics, "Средняя цена продаж"),

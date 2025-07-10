@@ -54,42 +54,58 @@ export const useOrderStore = defineStore("order", () => {
 
   const salesMetrics = computed(() => getMetrics("is_cancel", false));
   const sortedDescChangeSalesMetrics = computed(() =>
-    sortedMetrics(salesMetrics, "change", "desc")
+    sortedMetrics(salesMetrics as ComputedRef<OrderMetrics[]>, "change", "desc")
   );
   const topSalesMetrics = computed(() =>
     getTopMetrics(sortedDescChangeSalesMetrics, 10)
   );
-  const sumSalesMetrics = computed(() => getSumMetrics(salesMetrics));
+  const sumSalesMetrics = computed(() =>
+    getSumMetrics(salesMetrics as ComputedRef<OrderMetrics[]>)
+  );
 
   const cancelMetrics = computed(() => getMetrics("is_cancel", true));
   const sortedDescChangeCancelMetrics = computed(() =>
-    sortedMetrics(cancelMetrics, "change", "desc")
+    sortedMetrics(
+      cancelMetrics as ComputedRef<OrderMetrics[]>,
+      "change",
+      "desc"
+    )
   );
   const topCancelMetrics = computed(() =>
     getTopMetrics(sortedDescChangeCancelMetrics, 10)
   );
-  const sumCancelMetrics = computed(() => getSumMetrics(cancelMetrics));
+  const sumCancelMetrics = computed(() =>
+    getSumMetrics(cancelMetrics as ComputedRef<OrderMetrics[]>)
+  );
 
   const discPercentMetrics = computed(() => getMetrics("discount_percent"));
   const sortedDescChangeDiscPercentMetrics = computed(() =>
-    sortedMetrics(discPercentMetrics, "change", "desc")
+    sortedMetrics(
+      discPercentMetrics as ComputedRef<OrderMetrics[]>,
+      "change",
+      "desc"
+    )
   );
   const topDiscPercentMetrics = computed(() =>
     getTopMetrics(sortedDescChangeDiscPercentMetrics, 10)
   );
   const sumDiscPercentMetrics = computed(() =>
-    getMeanSumMetrics(discPercentMetrics)
+    getMeanSumMetrics(discPercentMetrics as ComputedRef<OrderMetrics[]>)
   );
 
   const totalPriceMetrics = computed(() => getMetrics("total_price"));
   const sortedDescChangeTotalPriceMetrics = computed(() =>
-    sortedMetrics(totalPriceMetrics, "change", "desc")
+    sortedMetrics(
+      totalPriceMetrics as ComputedRef<OrderMetrics[]>,
+      "change",
+      "desc"
+    )
   );
   const topTotalPriceMetrics = computed(() =>
     getTopMetrics(sortedDescChangeTotalPriceMetrics, 10)
   );
   const sumTotalPriceMetrics = computed(() =>
-    getMeanSumMetrics(totalPriceMetrics)
+    getMeanSumMetrics(totalPriceMetrics as ComputedRef<OrderMetrics[]>)
   );
 
   const fetchAllOrders = async (page = 1) => {
@@ -173,7 +189,10 @@ export const useOrderStore = defineStore("order", () => {
         order.date.slice(0, 10) >= start && order.date.slice(0, 10) <= end
     );
 
-  const getMetrics = (field: keyof Order, value?: boolean): OrderMetrics[] => {
+  const getMetrics = (
+    field: keyof Order,
+    value?: boolean
+  ): OrderMetrics[] | null => {
     if (field === "is_cancel")
       return Array.from(allArticles.value).map((nm_id) => {
         const prev = prevPeriod.value.filter(
@@ -258,47 +277,51 @@ export const useOrderStore = defineStore("order", () => {
         return { nm_id, prev, current, change, svg };
       });
 
-    return Array.from(allArticles.value).map((nm_id) => {
-      const prevArr = prevPeriod.value.filter((order) => order.nm_id === nm_id);
-      const prevSumPrice = prevArr.reduce(
-        (acc, order) => acc + parseFloat(order.total_price),
-        0
-      );
-      const prevCount = prevArr.length;
-      const prev = prevCount === 0 ? 0 : Math.round(prevSumPrice / prevCount);
+    if (field === "total_price")
+      return Array.from(allArticles.value).map((nm_id) => {
+        const prevArr = prevPeriod.value.filter(
+          (order) => order.nm_id === nm_id
+        );
+        const prevSumPrice = prevArr.reduce(
+          (acc, order) => acc + parseFloat(order.total_price),
+          0
+        );
+        const prevCount = prevArr.length;
+        const prev = prevCount === 0 ? 0 : Math.round(prevSumPrice / prevCount);
 
-      const currentArr = currPeriod.value.filter(
-        (order) => order.nm_id === nm_id
-      );
-      const currentSumPrice = currentArr.reduce(
-        (acc, order) => acc + parseFloat(order.total_price),
-        0
-      );
-      const currentCount = currentArr.length;
-      const current =
-        currentCount === 0 ? 0 : Math.round(currentSumPrice / currentCount);
+        const currentArr = currPeriod.value.filter(
+          (order) => order.nm_id === nm_id
+        );
+        const currentSumPrice = currentArr.reduce(
+          (acc, order) => acc + parseFloat(order.total_price),
+          0
+        );
+        const currentCount = currentArr.length;
+        const current =
+          currentCount === 0 ? 0 : Math.round(currentSumPrice / currentCount);
 
-      let change = "0%";
-      let svg = 0;
-      if (current === 0 && prev !== 0) {
-        change = "-100%";
-        svg = -1;
-      }
-      if (current !== 0 && prev !== 0) {
-        if (current > prev) {
-          change = Math.round((1 - prev / current) * 100) + "%";
-          svg = 1;
-        }
-        if (current < prev) {
-          change = Math.round((current / prev - 1) * 100) + "%";
+        let change = "0%";
+        let svg = 0;
+        if (current === 0 && prev !== 0) {
+          change = "-100%";
           svg = -1;
         }
-        if (prev === current) {
-          change = "0%";
+        if (current !== 0 && prev !== 0) {
+          if (current > prev) {
+            change = Math.round((1 - prev / current) * 100) + "%";
+            svg = 1;
+          }
+          if (current < prev) {
+            change = Math.round((current / prev - 1) * 100) + "%";
+            svg = -1;
+          }
+          if (prev === current) {
+            change = "0%";
+          }
         }
-      }
-      return { nm_id, prev, current, change, svg };
-    });
+        return { nm_id, prev, current, change, svg };
+      });
+    return null;
   };
 
   const sortedMetrics = (

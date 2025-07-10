@@ -68,7 +68,7 @@ const selectedCategories = [
         :reset-filter="resetMetricsFilter"
       />
 
-      <h2 v-if="loadingOrders || !totalPriceMetrics.length">
+      <h2 v-if="loadingOrders || totalPriceMetrics === null">
         Загрузка данных для таблицы...
       </h2>
       <h2 v-else-if="error">{{ error }}</h2>
