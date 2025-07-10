@@ -10,7 +10,11 @@ const props = defineProps<{
 const selected = ref("");
 const value = ref("");
 
-const clearFilter = () => {
+const filtered = (): void => {
+  if (selected.value.trim() && value.value.trim())
+    props.getFilterData(selected.value, value.value);
+};
+const clearFilter = (): void => {
   selected.value = "";
   value.value = "";
   props.resetFilter();
@@ -31,11 +35,7 @@ const clearFilter = () => {
       type="text"
       class="filter-input"
     />
-    <button
-      type="button"
-      class="filter-btn"
-      @click="getFilterData(selected, value)"
-    >
+    <button type="button" class="filter-btn" @click="filtered">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         height="22px"
