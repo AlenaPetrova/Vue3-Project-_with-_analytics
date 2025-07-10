@@ -41,3 +41,9 @@ export const getEightDaysAgoStr = (): string => {
   const dd = String(eightDaysAgo.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 };
+
+export const getPrevPeriod = (): string =>
+  `${getTwoWeeksAgoStr()} - ${getEightDaysAgoStr()}`;
+
+export const getCurrPeriod = (): string =>
+  `${getWeekAgoStr()} - ${getYesterdayStr()}`;

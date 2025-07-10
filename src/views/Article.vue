@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import Table from "@/components/Table.vue";
+import { getPrevPeriod, getCurrPeriod } from "@/composables/useDate";
 
 const articleStore = useArticleStore();
 const { loadingArticles } = storeToRefs(articleStore);
@@ -18,8 +19,8 @@ console.log(metrics.value);
 
 const tableColumnsName = [
   { key: "name", label: "Показатель" },
-  { key: "prev", label: "Предыдущая неделя" },
-  { key: "current", label: "Текущая неделя" },
+  { key: "prev", label: `${getPrevPeriod()}` },
+  { key: "current", label: `${getCurrPeriod()}` },
   { key: "change", label: "Изменение" },
 ];
 </script>

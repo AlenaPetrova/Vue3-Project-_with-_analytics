@@ -5,6 +5,7 @@ import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
 import ChartMetrics from "@/components/ChartMetrics.vue";
 import Filter from "@/components/Filter.vue";
+import { getPrevPeriod, getCurrPeriod } from "@/composables/useDate";
 
 const orderStore = useOrderStore();
 const {
@@ -24,14 +25,14 @@ onMounted(async () => {
 
 const tableColumnsName = [
   { key: "nm_id", label: "Артикул" },
-  { key: "prev", label: "Предыдущая неделя" },
-  { key: "current", label: "Текущая неделя" },
+  { key: "prev", label: `${getPrevPeriod()}` },
+  { key: "current", label: `${getCurrPeriod()}` },
   { key: "change", label: "Изменение" },
 ];
 const routingColumnName = "nm_id";
 const to = { name: "article" };
 
-const chartColumnsame = ["Предыдущая неделя", "Текущая неделя"];
+const chartColumnsame = [`${getPrevPeriod()}`, `${getCurrPeriod()}`];
 
 const selectedCategories = [
   { key: "nm_id", label: "Артикул" },
