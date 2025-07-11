@@ -46,7 +46,7 @@ export const useArticleStore = defineStore("article", () => {
       obj: OrderMetrics,
       name: string
     ): ArticleMetrics => {
-      const { nm_id, ...rest } = obj;
+      const { nm_id, ...rest } = obj as OrderMetrics;
       return {
         ...rest,
         name,
