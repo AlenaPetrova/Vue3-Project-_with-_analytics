@@ -2,6 +2,7 @@
 import arrow from "@/assets/arrow.svg";
 import arrowUp from "@/assets/arrowUp.svg";
 import arrowDown from "@/assets/arrowDown.svg";
+import { useRoute, useRouter } from "vue-router";
 
 const { to, columnNameWithId } = defineProps<{
   columns: { key: string; label: string }[];
@@ -12,12 +13,16 @@ const { to, columnNameWithId } = defineProps<{
   showSvg?: boolean;
 }>();
 
-import { useRouter } from "vue-router";
 const router = useRouter();
+const route = useRoute();
 
 const goToPage = (row: Record<string, string | number>) => {
   if (!to || !columnNameWithId) return;
-  router.push({ ...to, params: { id: row[columnNameWithId] } });
+  router.push({
+    ...to,
+    params: { id: row[columnNameWithId] },
+    query: route.query,
+  });
 };
 </script>
 

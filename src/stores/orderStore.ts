@@ -40,15 +40,15 @@ export const useOrderStore = defineStore("order", () => {
   const totalPages = computed(() => allData.value.meta.last_page);
   const totalPagesAllOrders = ref<number | null>(null);
 
-  const startPrevPeriod = getTwoWeeksAgoStr();
-  const endPrevPeriod = getEightDaysAgoStr();
-  const startCurrPeriod = getWeekAgoStr();
-  const endCurrPeriod = getYesterdayStr();
-
   const filterTotalPriceMatrics: Ref<OrderMetrics[]> = ref([]);
   const filterDiscPercentMatrics: Ref<OrderMetrics[]> = ref([]);
   const filterSalesMatrics: Ref<OrderMetrics[]> = ref([]);
   const filterCancelMatrics: Ref<OrderMetrics[]> = ref([]);
+
+  const startPrevPeriod = getTwoWeeksAgoStr();
+  const endPrevPeriod = getEightDaysAgoStr();
+  const startCurrPeriod = getWeekAgoStr();
+  const endCurrPeriod = getYesterdayStr();
 
   const prevPeriod = computed(() => getPeriod(startPrevPeriod, endPrevPeriod));
   const currPeriod = computed(() => getPeriod(startCurrPeriod, endCurrPeriod));
@@ -159,10 +159,9 @@ export const useOrderStore = defineStore("order", () => {
 
   const filterAllOrders = (field: keyof Order, value: string): void => {
     orders.value = allOrders.value.filter((item) => {
-      if (typeof item[field] === "string") {
-        return item[field].toLowerCase() === value.toLowerCase();
-      }
-      return item[field] === Number(value);
+      if (typeof item[field] === "string")
+        return item[field].toLowerCase().includes(value.toLowerCase());
+      return item[field]?.toString().includes(value.toLowerCase());
     });
   };
 
@@ -171,7 +170,7 @@ export const useOrderStore = defineStore("order", () => {
       const orders = allOrders.value.filter((item) => {
         if (typeof item[field] === "string")
           return item[field].toLowerCase().includes(value.toLowerCase());
-        return item[field]?.toString().includes(value);
+        return item[field]?.toString().includes(value.toLowerCase());
       });
       return orders.length ? orders.map((item) => item.nm_id) : null;
     };

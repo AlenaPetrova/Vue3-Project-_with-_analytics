@@ -1,4 +1,8 @@
-import { createWebHistory, createRouter } from "vue-router";
+import {
+  createWebHistory,
+  createRouter,
+  type RouteLocationNormalized,
+} from "vue-router";
 
 const Layout = () => import("@/views/Layout.vue");
 const Incomes = () => import("@/views/Incomes.vue");
@@ -12,36 +16,116 @@ const NumberOfSales = () => import("@/views/NumberOfSales.vue");
 const NumberOfCancellations = () => import("@/views/NumberOfCancellations.vue");
 const Article = () => import("@/views/Article.vue");
 
+const routesWithFilter = [
+  "main",
+  "totalprice",
+  "discountrcent",
+  "numofsales",
+  "numofcancel",
+];
+
+const removeFilterQueryParams = (to: RouteLocationNormalized) => {
+  const { filterSelected, filterValue, ...restQuery } = to.query;
+  if (filterSelected || filterValue)
+    return {
+      name: to.name,
+      params: to.params,
+      query: restQuery,
+      hash: to.hash,
+    };
+};
+
+const setQueryParams = (
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized
+) => {
+  const isFromRouteWithFilter = routesWithFilter.find(
+    (route) => route === from.name
+  );
+  const isToRouteWithFilter = routesWithFilter.find(
+    (route) => route === to.name
+  );
+  const { filterSelected: fromSelected, filterValue: fromValue } = from.query;
+  const { filterSelected: toSelected, filterValue: toValue } = to.query;
+
+  if (
+    isFromRouteWithFilter &&
+    isToRouteWithFilter &&
+    (fromSelected !== toSelected || fromValue !== toValue)
+  )
+    return {
+      name: to.name,
+      query: {
+        ...to.query,
+        filterSelected: from.query.filterSelected,
+        filterValue: from.query.filterValue,
+      },
+      hash: to.hash,
+    };
+};
 
 const routes = [
   {
     path: "/",
-    name: "layout",
     component: Layout,
     children: [
-      { path: "", redirect: "/main" },
-      { path: "incomes", name: "incomes", component: Incomes },
-      { path: "orders", name: "orders", component: Orders },
-      { path: "sales", name: "sales", component: Sales },
-      { path: "stocks", name: "stocks", component: Stocks },
-      { path: "main", name: "main", component: MainPage },
-      { path: "main/totalprice", name: "totalprice", component: TotalPrice },
+      { path: "", name: "layout", redirect: "/main" },
+      {
+        path: "incomes",
+        name: "incomes",
+        component: Incomes,
+      },
+      {
+        path: "orders",
+        name: "orders",
+        component: Orders,
+      },
+      {
+        path: "sales",
+        name: "sales",
+        component: Sales,
+      },
+      {
+        path: "stocks",
+        name: "stocks",
+        component: Stocks,
+      },
+      {
+        path: "main",
+        name: "main",
+        component: MainPage,
+        beforeEnter: [setQueryParams],
+      },
+      {
+        path: "main/totalprice",
+        name: "totalprice",
+        component: TotalPrice,
+        beforeEnter: [setQueryParams],
+      },
       {
         path: "main/discountrcent",
         name: "discountrcent",
         component: DiscountPercent,
+        beforeEnter: [setQueryParams],
       },
       {
         path: "main/numofsales",
         name: "numofsales",
         component: NumberOfSales,
+        beforeEnter: [setQueryParams],
       },
       {
         path: "main/numofcancel",
         name: "numofcancel",
         component: NumberOfCancellations,
+        beforeEnter: [setQueryParams],
       },
-      { path: "main/article/:id(\\d+)", name: "article", component: Article },
+      {
+        path: "article/:id(\\d+)",
+        name: "article",
+        component: Article,
+        beforeEnter: [removeFilterQueryParams],
+      },
     ],
   },
 ];

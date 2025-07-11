@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useIncomeStore } from "@/stores/incomeStore";
 import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
 import PaginationBar from "@/components/PaginationBar.vue";
 import ChartView from "@/components/ChartView.vue";
 import Filter from "@/components/Filter.vue";
+import { useRoute, useRouter } from "vue-router";
+import type { Income } from "@/types";
 
 const incomeStore = useIncomeStore();
 const {
@@ -42,6 +44,35 @@ const selectedCategories = [
   { key: "barcode", label: "Штрихкод" },
   { key: "warehouse_name", label: "Название склада" },
 ];
+
+const route = useRoute();
+const router = useRouter();
+const filterSelected = ref(route.query.filterSelected?.toString() || "");
+const filterValue = ref(route.query.filterValue?.toString() || "");
+
+watch([filterSelected, filterValue], ([newSelected, newValue]) => {
+  if (!newSelected && !newValue) {
+    const { filterSelected, filterValue, ...rest } = route.query;
+    router.replace({ query: rest });
+  } else
+    router.replace({
+      query: {
+        ...route.query,
+        filterSelected: newSelected,
+        filterValue: newValue,
+      },
+    });
+});
+
+watch(
+  () => loadingAllIncomes.value,
+  (isLoading) => {
+    if (!isLoading && filterSelected.value && filterValue.value) {
+      filterAllIncomes(filterSelected.value as keyof Income, filterValue.value);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -66,6 +97,8 @@ const selectedCategories = [
         :table-categories="selectedCategories"
         :get-filter-data="filterAllIncomes"
         :reset-filter="resetFilter"
+        v-model:selected="filterSelected"
+        v-model:value="filterValue"
       />
 
       <Table :columns="incomeColumns" :rows="incomes" />

@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
-
 const props = defineProps<{
   tableCategories: { key: string; label: string }[];
   getFilterData: (field: any, value: string) => void;
   resetFilter: () => void;
 }>();
 
-const selected = ref("");
-const value = ref("");
+const selected = defineModel<string>("selected", { default: "" });
+const value = defineModel<string>("value", { default: "" });
 
 const filtered = (): void => {
   if (selected.value.trim() && value.value.trim())

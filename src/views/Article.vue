@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { useArticleStore } from "@/stores/articleStore";
 import { storeToRefs } from "pinia";
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Table from "@/components/Table.vue";
 import { getPrevPeriod, getCurrPeriod } from "@/composables/useDate";
+import { useOrderStore } from "@/stores/orderStore";
 
 const articleStore = useArticleStore();
 const { loadingArticles } = storeToRefs(articleStore);
 const { getArticle, getArticleMetrics } = articleStore;
+
+const orderStore = useOrderStore();
+const { fetchAllOrders } = orderStore;
+onMounted(async () => {
+  fetchAllOrders();
+});
 
 const { params } = useRoute();
 const nm_id = computed(() => +params.id);
