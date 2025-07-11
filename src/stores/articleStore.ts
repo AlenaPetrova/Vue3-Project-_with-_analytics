@@ -46,7 +46,16 @@ export const useArticleStore = defineStore("article", () => {
       obj: OrderMetrics,
       name: string
     ): ArticleMetrics => {
-      const { nm_id, ...rest } = obj as OrderMetrics;
+       if (!obj) {
+         return {
+           name,
+           prev: 0,
+           current: 0,
+           change: "0%",
+           svg: 0,
+         };
+       }
+      const { nm_id, ...rest } = obj ;
       return {
         ...rest,
         name,
