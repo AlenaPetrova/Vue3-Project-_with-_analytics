@@ -120,6 +120,7 @@ watch(
         :to="to"
         :column-name-with-id="routingColumnName"
         show-svg
+        reverse-svg
       />
     </div>
   </div>

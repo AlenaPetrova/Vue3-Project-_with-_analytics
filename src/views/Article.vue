@@ -60,7 +60,13 @@ const tableColumnsName = [
         <h3 v-if="loadingArticles || !metrics">
           Загрузка данных о метриках артикула...
         </h3>
-        <Table v-else :columns="tableColumnsName" :rows="metrics" show-svg />
+        <Table
+          v-else
+          :columns="tableColumnsName"
+          :rows="metrics"
+          show-svg
+          :reverse-svg="[3]"
+        />
       </section>
     </div>
   </div>

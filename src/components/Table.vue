@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import arrow from "@/assets/arrow.svg";
-import arrowUp from "@/assets/arrowUp.svg";
-import arrowDown from "@/assets/arrowDown.svg";
+import arrowUpGreen from "@/assets/arrowUpGreen.svg";
+import arrowDownRed from "@/assets/arrowDownRed.svg";
+import arrowUpRed from "@/assets/arrowUpRed.svg";
+import arrowDownGreen from "@/assets/arrowDownGreen.svg";
 import { useRoute, useRouter } from "vue-router";
 
 const { to, columnNameWithId } = defineProps<{
@@ -11,6 +13,7 @@ const { to, columnNameWithId } = defineProps<{
   to?: { name: string };
   columnNameWithId?: string;
   showSvg?: boolean;
+  reverseSvg?: boolean | number[];
 }>();
 
 const router = useRouter();
@@ -47,10 +50,27 @@ const goToPage = (row: Record<string, string | number>) => {
           <td v-for="{ key } in columns" :key="key">
             {{ row[key] }}
           </td>
+
           <td v-if="showSvg">
-            <img v-if="row.svg === 1" :src="arrowUp" alt="arrow up" />
-            <img v-if="row.svg === -1" :src="arrowDown" alt="arrow down" />
-            <img v-if="row.svg === 0" :src="arrow" alt="arrow" />
+            <div
+              v-if="
+                reverseSvg === true ||
+                (Array.isArray(reverseSvg) && reverseSvg.includes(idx))
+              "
+            >
+              <img v-if="row.svg === 1" :src="arrowUpRed" alt="arrow up" />
+              <img
+                v-if="row.svg === -1"
+                :src="arrowDownGreen"
+                alt="arrow down"
+              />
+              <img v-if="row.svg === 0" :src="arrow" alt="arrow" />
+            </div>
+            <div v-else>
+              <img v-if="row.svg === 1" :src="arrowUpGreen" alt="arrow up" />
+              <img v-if="row.svg === -1" :src="arrowDownRed" alt="arrow down" />
+              <img v-if="row.svg === 0" :src="arrow" alt="arrow" />
+            </div>
           </td>
         </tr>
       </tbody>
@@ -107,10 +127,10 @@ const goToPage = (row: Record<string, string | number>) => {
     }
 
     &:nth-child(n) {
-      background-color: var(--color-gray);
+      background-color: var(--color-white);
     }
     &:nth-child(2n) {
-      background-color: var(--color-white);
+      background-color: var(--color-gray);
     }
 
     &:last-child {
