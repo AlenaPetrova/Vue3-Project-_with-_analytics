@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { onMounted, onUnmounted, watch } from "vue";
 import { useOrderStore } from "@/stores/orderStore";
 import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
@@ -11,6 +11,8 @@ import type { Order } from "@/types";
 
 const orderStore = useOrderStore();
 const {
+  filterSelected,
+  filterValue,
   filterTotalPriceMatrics,
   sumTotalPriceMetrics,
   loadingOrders,
@@ -49,8 +51,9 @@ const selectedCategories = [
 
 const route = useRoute();
 const router = useRouter();
-const filterSelected = ref(route.query.filterSelected?.toString() || "");
-const filterValue = ref(route.query.filterValue?.toString() || "");
+filterSelected.value =
+  route.query.filterSelected?.toString() || filterSelected.value;
+filterValue.value = route.query.filterValue?.toString() || filterValue.value;
 
 watch([filterSelected, filterValue], ([newSelected, newValue]) => {
   if (!newSelected && !newValue) {

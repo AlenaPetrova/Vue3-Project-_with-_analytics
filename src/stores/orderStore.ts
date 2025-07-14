@@ -40,6 +40,9 @@ export const useOrderStore = defineStore("order", () => {
   const totalPages = computed(() => allData.value.meta.last_page);
   const totalPagesAllOrders = ref<number | null>(null);
 
+  const filterSelected = ref("");
+  const filterValue = ref("");
+
   const filterTotalPriceMatrics: Ref<OrderMetrics[]> = ref([]);
   const filterDiscPercentMatrics: Ref<OrderMetrics[]> = ref([]);
   const filterSalesMatrics: Ref<OrderMetrics[]> = ref([]);
@@ -197,6 +200,8 @@ export const useOrderStore = defineStore("order", () => {
 
   const resetFilter = (): void => goToPage(1);
   const resetMetricsFilter = (): void => {
+    filterSelected.value = "";
+    filterValue.value = "";
     filterTotalPriceMatrics.value = totalPriceMetrics.value as OrderMetrics[];
     filterDiscPercentMatrics.value = discPercentMetrics.value as OrderMetrics[];
     filterSalesMatrics.value = salesMetrics.value as OrderMetrics[];
@@ -449,6 +454,8 @@ export const useOrderStore = defineStore("order", () => {
     currentPage,
     totalPages,
     goToPage,
+    filterSelected,
+    filterValue,
     allArticles,
     salesMetrics,
     sortedDescChangeSalesMetrics,
