@@ -35,6 +35,7 @@ export const useOrderStore = defineStore("order", () => {
   const loadingOrders = ref(false);
   const loadingAllOrders = ref(false);
   const error = ref<string | null>(null);
+  const isDateFilterFetching = ref(false);
 
   const currentPage = ref(1);
   const totalPages = computed(() => allData.value.meta.last_page);
@@ -181,9 +182,12 @@ export const useOrderStore = defineStore("order", () => {
     value: string
   ): Promise<void> => {
     if (field === "date") {
+      if (isDateFilterFetching.value) return;
+      isDateFilterFetching.value = true;
       startCurrPeriod.value = value.split("/")[0];
       endCurrPeriod.value = value.split("/")[1];
       await fetchAllOrders();
+      isDateFilterFetching.value = false;
     } else {
       const findIdByFilter = (): number[] | null => {
         const orders = allOrders.value.filter((item) => {
@@ -474,6 +478,7 @@ export const useOrderStore = defineStore("order", () => {
     currentPage,
     totalPages,
     goToPage,
+    isDateFilterFetching,
     startPrevPeriod,
     endPrevPeriod,
     startCurrPeriod,

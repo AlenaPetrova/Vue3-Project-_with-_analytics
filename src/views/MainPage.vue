@@ -31,6 +31,7 @@ const {
   loadingOrders,
   loadingAllOrders,
   error,
+  isDateFilterFetching,
 } = storeToRefs(orderStore);
 const { fetchOrders, fetchAllOrders, resetMetricsFilter, filterOrdersMetrics } =
   orderStore;
@@ -94,7 +95,12 @@ watch([filterSelected, filterValue], ([newSelected, newValue]) => {
 watch(
   () => loadingAllOrders.value,
   (isLoading) => {
-    if (!isLoading && filterSelected.value && filterValue.value) {
+    if (
+      !isLoading &&
+      filterSelected.value &&
+      filterValue.value &&
+      !isDateFilterFetching.value
+    ) {
       filterOrdersMetrics(
         filterSelected.value as keyof Order,
         filterValue.value
