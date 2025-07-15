@@ -176,10 +176,14 @@ export const useOrderStore = defineStore("order", () => {
     });
   };
 
-  const filterOrdersMetrics = (field: keyof Order, value: string): void => {
+  const filterOrdersMetrics = async (
+    field: keyof Order,
+    value: string
+  ): Promise<void> => {
     if (field === "date") {
       startCurrPeriod.value = value.split("/")[0];
       endCurrPeriod.value = value.split("/")[1];
+      await fetchAllOrders();
     } else {
       const findIdByFilter = (): number[] | null => {
         const orders = allOrders.value.filter((item) => {

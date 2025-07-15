@@ -65,7 +65,10 @@ watch([filterSelected, filterValue], ([newSelected, newValue]) => {
     });
 });
 
-const filterArticleMetrics = (field: keyof Order, value: string): void => {
+const filterArticleMetrics = async (
+  field: keyof Order,
+  value: string
+): Promise<void> => {
   const goToArticle = (id: number): void => {
     router.push({
       name: "article",
@@ -87,6 +90,7 @@ const filterArticleMetrics = (field: keyof Order, value: string): void => {
   if (field === "date") {
     startCurrPeriod.value = value.split("/")[0];
     endCurrPeriod.value = value.split("/")[1];
+    await fetchAllOrders();
   }
 };
 </script>
