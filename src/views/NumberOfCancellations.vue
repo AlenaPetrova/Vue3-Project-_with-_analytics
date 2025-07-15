@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch } from "vue";
+import { computed, onMounted, onUnmounted, watch } from "vue";
 import { useOrderStore } from "@/stores/orderStore";
 import { storeToRefs } from "pinia";
 import Table from "@/components/Table.vue";
 import ChartMetrics from "@/components/ChartMetrics.vue";
 import Filter from "@/components/Filter.vue";
-import { getPrevPeriod, getCurrPeriod } from "@/composables/useDate";
 import { useRoute, useRouter } from "vue-router";
 import type { Order } from "@/types";
 
 const orderStore = useOrderStore();
 const {
+  startPrevPeriod,
+  endPrevPeriod,
+  startCurrPeriod,
+  endCurrPeriod,
   filterSelected,
   filterValue,
   filterCancelMatrics,
@@ -30,23 +33,29 @@ onUnmounted(() => {
   filterCancelMatrics.value = [];
 });
 
-const tableColumnsName = [
+const tableColumnsName = computed(() => [
   { key: "nm_id", label: "Артикул" },
-  { key: "prev", label: `${getPrevPeriod()}` },
-  { key: "current", label: `${getCurrPeriod()}` },
+  { key: "prev", label: `${startPrevPeriod.value} - ${endPrevPeriod.value}` },
+  {
+    key: "current",
+    label: `${startCurrPeriod.value} - ${endCurrPeriod.value}`,
+  },
   { key: "change", label: "Изменение" },
-];
+]);
 const routingColumnName = "nm_id";
 const to = { name: "article" };
 
-const chartColumnsame = [`${getPrevPeriod()}`, `${getCurrPeriod()}`];
+const chartColumnsame = computed(() => [
+  `${startPrevPeriod.value} - ${endPrevPeriod.value}`,
+  `${startCurrPeriod.value} - ${endCurrPeriod.value}`,
+]);
 
 const selectedCategories = [
   { key: "nm_id", label: "Артикул" },
   { key: "category", label: "Категория" },
   { key: "brand", label: "Бренд" },
   { key: "oblast", label: "Регион" },
-  { key: "date", label: "Дата (yyyy-mm-dd)" },
+  { key: "date", label: "Текущий период (yyyy-mm-dd/yyyy-mm-dd)" },
 ];
 
 const route = useRoute();

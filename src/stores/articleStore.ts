@@ -1,11 +1,15 @@
 import { defineStore, storeToRefs } from "pinia";
-import { computed, type ComputedRef } from "vue";
-import type { Article, ArticleMetrics, OrderMetrics } from "@/types";
+import { computed } from "vue";
+import type { Article, ArticleMetrics, Order, OrderMetrics } from "@/types";
 import { useOrderStore } from "@/stores/orderStore";
+import { getAllPeriodByDays } from "@/composables/useDate";
 
 export const useArticleStore = defineStore("article", () => {
   const orderStore = useOrderStore();
   const {
+    startPrevPeriod,
+    endCurrPeriod,
+    allOrders,
     allArticles: allOrderNMID,
     salesMetrics,
     cancelMetrics,
@@ -16,6 +20,11 @@ export const useArticleStore = defineStore("article", () => {
   const loadingArticles = computed(() =>
     orderArticles.value.length ? false : true
   );
+
+  const allPeriodByDays = computed(() => {
+    if (!startPrevPeriod.value || !endCurrPeriod.value) return [];
+    return getAllPeriodByDays(startPrevPeriod.value, endCurrPeriod.value);
+  });
 
   const orderArticles = computed(() => getArticles(allOrderNMID.value));
 
@@ -46,51 +55,105 @@ export const useArticleStore = defineStore("article", () => {
       obj: OrderMetrics,
       name: string
     ): ArticleMetrics => {
-       if (!obj) {
-         return {
-           name,
-           prev: 0,
-           current: 0,
-           change: "0%",
-           svg: 0,
-         };
-       }
-      const { nm_id, ...rest } = obj ;
+      if (!obj) {
+        return {
+          name,
+          change: "0%",
+          svg: 0,
+        };
+      }
+      const { change, svg } = obj;
       return {
-        ...rest,
         name,
+        change,
+        svg,
       };
     };
 
     if (storeName === "order") {
-      const objPrice = (
-        totalPriceMetrics as ComputedRef<OrderMetrics[]>
-      ).value.find((obj) => obj.nm_id === nm_id);
-      const objDiscount = (
-        discPercentMetrics as ComputedRef<OrderMetrics[]>
-      ).value.find((obj) => obj.nm_id === nm_id);
-      const objSale = (salesMetrics as ComputedRef<OrderMetrics[]>).value.find(
+      const objPrice = (totalPriceMetrics.value as OrderMetrics[]).find(
         (obj) => obj.nm_id === nm_id
       );
-      const objCancel = (
-        cancelMetrics as ComputedRef<OrderMetrics[]>
-      ).value.find((obj) => obj.nm_id === nm_id);
+      const objDiscount = (discPercentMetrics.value as OrderMetrics[]).find(
+        (obj) => obj.nm_id === nm_id
+      );
+      const objSale = (salesMetrics.value as OrderMetrics[]).find(
+        (obj) => obj.nm_id === nm_id
+      );
+      const objCancel = (cancelMetrics.value as OrderMetrics[]).find(
+        (obj) => obj.nm_id === nm_id
+      );
 
+      const objPriceByDays = transformMetric(
+        objPrice as OrderMetrics,
+        "Средняя цена продаж"
+      );
+      const objDuscountByDays = transformMetric(
+        objDiscount as OrderMetrics,
+        "Средний размер скидки"
+      );
+      const objSalesByDays = transformMetric(
+        objSale as OrderMetrics,
+        "Кол-во продаж"
+      );
+      const objCancelByDays = transformMetric(
+        objCancel as OrderMetrics,
+        "Кол-во отмен"
+      );
+
+      allPeriodByDays.value.map((date) => {
+        const ordersByDate = allOrders.value.filter(
+          (order) => order.nm_id === nm_id && order.date.includes(date)
+        );
+        const count = ordersByDate.length;
+        const sumTotalPrice = ordersByDate.reduce((sum, order) => {
+          return sum + parseFloat(order.total_price);
+        }, 0);
+        const sumDiscount = ordersByDate.reduce((sum, order) => {
+          return sum + order.discount_percent;
+        }, 0);
+        const sumSales = ordersByDate.reduce((sum, order) => {
+          return !order.is_cancel ? sum + 1 : sum;
+        }, 0);
+        const sumCancel = ordersByDate.reduce((sum, order) => {
+          return order.is_cancel ? sum + 1 : sum;
+        }, 0);
+
+        const meanTotalPrice =
+          count && sumTotalPrice ? Math.round(sumTotalPrice / count) : 0;
+        const meanDiscount =
+          count && sumDiscount ? Math.round(sumDiscount / count) : 0;
+
+        objPriceByDays[date] = meanTotalPrice;
+        objDuscountByDays[date] = meanDiscount;
+        objSalesByDays[date] = sumSales;
+        objCancelByDays[date] = sumCancel;
+      });
       return [
-        transformMetric(objPrice as OrderMetrics, "Средняя цена продаж"),
-        transformMetric(objDiscount as OrderMetrics, "Средний размер скидки"),
-        transformMetric(objSale as OrderMetrics, "Кол-во продаж"),
-        transformMetric(objCancel as OrderMetrics, "Кол-во отмен"),
+        objPriceByDays,
+        objDuscountByDays,
+        objSalesByDays,
+        objCancelByDays,
       ];
     }
     return null;
   };
 
+  const findIdByFilter = (field: keyof Order, value: string): number | null => {
+    const order = allOrders.value.find((item) => {
+      if (typeof item[field] === "string")
+        return item[field].toLowerCase().includes(value.toLowerCase());
+    });
+    return order?.nm_id || null;
+  };
+
   return {
     loadingArticles,
     orderArticles,
+    allPeriodByDays,
     getArticles,
     getArticle,
     getArticleMetrics,
+    findIdByFilter,
   };
 });

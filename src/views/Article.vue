@@ -1,33 +1,94 @@
 <script setup lang="ts">
 import { useArticleStore } from "@/stores/articleStore";
 import { storeToRefs } from "pinia";
-import { computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import Table from "@/components/Table.vue";
-import { getPrevPeriod, getCurrPeriod } from "@/composables/useDate";
 import { useOrderStore } from "@/stores/orderStore";
+import Filter from "@/components/Filter.vue";
+import type { Order } from "@/types";
 
 const articleStore = useArticleStore();
-const { loadingArticles } = storeToRefs(articleStore);
-const { getArticle, getArticleMetrics } = articleStore;
+const { loadingArticles, allPeriodByDays } = storeToRefs(articleStore);
+const { getArticle, getArticleMetrics, findIdByFilter } = articleStore;
 
 const orderStore = useOrderStore();
-const { fetchAllOrders } = orderStore;
+const { startCurrPeriod, endCurrPeriod, filterSelected, filterValue, error } =
+  storeToRefs(orderStore);
+const { fetchAllOrders, resetMetricsFilter } = orderStore;
 onMounted(async () => {
   fetchAllOrders();
 });
 
-const { params } = useRoute();
-const nm_id = computed(() => +params.id);
+const route = useRoute();
+const nm_id = computed(() => +route.params.id);
 const article = computed(() => getArticle(nm_id.value, "order"));
 const metrics = computed(() => getArticleMetrics(nm_id.value, "order"));
 
-const tableColumnsName = [
+const transformAllPeriod = (): { key: string; label: string }[] => {
+  return allPeriodByDays.value.map((str) => ({
+    key: str,
+    label: str,
+  }));
+};
+
+const tableColumnsName = computed(() => [
   { key: "name", label: "Показатель" },
-  { key: "prev", label: `${getPrevPeriod()}` },
-  { key: "current", label: `${getCurrPeriod()}` },
+  ...transformAllPeriod(),
   { key: "change", label: "Изменение" },
+]);
+
+const selectedCategories = [
+  { key: "nm_id", label: "Артикул" },
+  { key: "category", label: "Категория" },
+  { key: "brand", label: "Бренд" },
+  { key: "oblast", label: "Регион" },
+  { key: "date", label: "Текущий период (yyyy-mm-dd/yyyy-mm-dd)" },
 ];
+
+const router = useRouter();
+filterSelected.value =
+  route.query.filterSelected?.toString() || filterSelected.value;
+filterValue.value = route.query.filterValue?.toString() || filterValue.value;
+
+watch([filterSelected, filterValue], ([newSelected, newValue]) => {
+  if (!newSelected && !newValue) {
+    const { filterSelected, filterValue, ...rest } = route.query;
+    router.replace({ query: rest });
+  } else
+    router.replace({
+      query: {
+        ...route.query,
+        filterSelected: newSelected,
+        filterValue: newValue,
+      },
+    });
+});
+
+const filterArticleMetrics = (field: keyof Order, value: string): void => {
+  const goToArticle = (id: number): void => {
+    router.push({
+      name: "article",
+      params: { id: id },
+      query: {
+        ...route.query,
+        filterSelected: field,
+        filterValue: value,
+      },
+    });
+  };
+  if (field === "nm_id") {
+    goToArticle(+value);
+  }
+  if (field === "category" || field === "brand" || field === "oblast") {
+    const id = findIdByFilter(field, value);
+    if (id) goToArticle(id);
+  }
+  if (field === "date") {
+    startCurrPeriod.value = value.split("/")[0];
+    endCurrPeriod.value = value.split("/")[1];
+  }
+};
 </script>
 
 <template>
@@ -56,6 +117,16 @@ const tableColumnsName = [
 
       <section class="info">
         <h2>Таблица метрик товара</h2>
+
+        <h3 v-if="error"></h3>
+        <Filter
+          v-else-if="!loadingArticles"
+          :table-categories="selectedCategories"
+          :get-filter-data="filterArticleMetrics"
+          :reset-filter="resetMetricsFilter"
+          v-model:selected="filterSelected"
+          v-model:value="filterValue"
+        />
 
         <h3 v-if="loadingArticles || !metrics">
           Загрузка данных о метриках артикула...

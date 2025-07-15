@@ -24,26 +24,44 @@ export const getWeekAgoStr = (): string => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-export const getTwoWeeksAgoStr = (): string => {
-  const twoWeeksAgo = new Date();
-  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-  const yyyy = twoWeeksAgo.getFullYear();
-  const mm = String(twoWeeksAgo.getMonth() + 1).padStart(2, "0");
-  const dd = String(twoWeeksAgo.getDate()).padStart(2, "0");
+export const getStartPrevPeriod = (start: string, end: string): string => {
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+
+  const diffMs = endDate.getTime() - startDate.getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+
+  startDate.setDate(startDate.getDate() - days);
+
+  const yyyy = startDate.getFullYear();
+  const mm = String(startDate.getMonth() + 1).padStart(2, "0");
+  const dd = String(startDate.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 };
 
-export const getEightDaysAgoStr = (): string => {
-  const eightDaysAgo = new Date();
-  eightDaysAgo.setDate(eightDaysAgo.getDate() - 8);
-  const yyyy = eightDaysAgo.getFullYear();
-  const mm = String(eightDaysAgo.getMonth() + 1).padStart(2, "0");
-  const dd = String(eightDaysAgo.getDate()).padStart(2, "0");
+export const getEndtPrevPeriod = (startCurrPeriod: string): string => {
+  const date = new Date(startCurrPeriod);
+  date.setDate(date.getDate() - 1);
+
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 };
 
-export const getPrevPeriod = (): string =>
-  `${getTwoWeeksAgoStr()} - ${getEightDaysAgoStr()}`;
+export const getAllPeriodByDays = (start: string, end: string): string[] => {
+  const result: string[] = [];
+  let current = new Date(start);
+  const last = new Date(end);
 
-export const getCurrPeriod = (): string =>
-  `${getWeekAgoStr()} - ${getYesterdayStr()}`;
+  while (current <= last) {
+    const yyyy = current.getFullYear();
+    const mm = String(current.getMonth() + 1).padStart(2, "0");
+    const dd = String(current.getDate()).padStart(2, "0");
+    result.push(`${yyyy}-${mm}-${dd}`);
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return result;
+};

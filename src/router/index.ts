@@ -22,18 +22,8 @@ const routesWithFilter = [
   "discountrcent",
   "numofsales",
   "numofcancel",
+  "article",
 ];
-
-const removeFilterQueryParams = (to: RouteLocationNormalized) => {
-  const { filterSelected, filterValue, ...restQuery } = to.query;
-  if (filterSelected || filterValue)
-    return {
-      name: to.name,
-      params: to.params,
-      query: restQuery,
-      hash: to.hash,
-    };
-};
 
 const setQueryParams = (
   to: RouteLocationNormalized,
@@ -124,7 +114,7 @@ const routes = [
         path: "article/:id(\\d+)",
         name: "article",
         component: Article,
-        beforeEnter: [removeFilterQueryParams],
+        beforeEnter: [setQueryParams],
       },
     ],
   },

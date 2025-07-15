@@ -128,8 +128,7 @@ export interface Article {
 
 export interface ArticleMetrics {
   name: string;
-  prev: number;
-  current: number;
   change: string;
   svg?: number;
+  [key: string]: number | string | undefined;
 }

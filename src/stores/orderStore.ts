@@ -4,9 +4,9 @@ import type { Order, OrderMetrics, OrderMetricsChart, Resp } from "@/types";
 import axios from "axios";
 import {
   getYesterdayStr,
-  getEightDaysAgoStr,
-  getTwoWeeksAgoStr,
   getWeekAgoStr,
+  getStartPrevPeriod,
+  getEndtPrevPeriod,
 } from "@/composables/useDate";
 
 export const useOrderStore = defineStore("order", () => {
@@ -48,13 +48,21 @@ export const useOrderStore = defineStore("order", () => {
   const filterSalesMatrics: Ref<OrderMetrics[]> = ref([]);
   const filterCancelMatrics: Ref<OrderMetrics[]> = ref([]);
 
-  const startPrevPeriod = getTwoWeeksAgoStr();
-  const endPrevPeriod = getEightDaysAgoStr();
-  const startCurrPeriod = getWeekAgoStr();
-  const endCurrPeriod = getYesterdayStr();
+  const startCurrPeriod = ref(getWeekAgoStr());
+  const endCurrPeriod = ref(getYesterdayStr());
+  const startPrevPeriod = computed(() =>
+    getStartPrevPeriod(startCurrPeriod.value, endCurrPeriod.value)
+  );
+  const endPrevPeriod = computed(() =>
+    getEndtPrevPeriod(startCurrPeriod.value)
+  );
 
-  const prevPeriod = computed(() => getPeriod(startPrevPeriod, endPrevPeriod));
-  const currPeriod = computed(() => getPeriod(startCurrPeriod, endCurrPeriod));
+  const prevPeriod = computed(() =>
+    getPeriod(startPrevPeriod.value, endPrevPeriod.value)
+  );
+  const currPeriod = computed(() =>
+    getPeriod(startCurrPeriod.value, endCurrPeriod.value)
+  );
 
   const allArticles = computed(
     () => new Set([...allOrders.value.map((order) => order.nm_id)])
@@ -111,8 +119,8 @@ export const useOrderStore = defineStore("order", () => {
     try {
       const response = await axios.get<Resp>("/api/orders", {
         params: {
-          dateFrom: startPrevPeriod,
-          dateTo: endCurrPeriod,
+          dateFrom: startPrevPeriod.value,
+          dateTo: endCurrPeriod.value,
           page,
           key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
         },
@@ -143,8 +151,8 @@ export const useOrderStore = defineStore("order", () => {
     try {
       const response = await axios.get<Resp>("/api/orders", {
         params: {
-          dateFrom: startPrevPeriod,
-          dateTo: endCurrPeriod,
+          dateFrom: startPrevPeriod.value,
+          dateTo: endCurrPeriod.value,
           page,
           key: "E6kUTYrYwZq2tN4QEtyzsbEBk3ie",
           limit: 100,
@@ -169,39 +177,47 @@ export const useOrderStore = defineStore("order", () => {
   };
 
   const filterOrdersMetrics = (field: keyof Order, value: string): void => {
-    const findIdByFilter = (): number[] | null => {
-      const orders = allOrders.value.filter((item) => {
-        if (typeof item[field] === "string")
-          return item[field].toLowerCase().includes(value.toLowerCase());
-        return item[field]?.toString().includes(value.toLowerCase());
-      });
-      return orders.length ? orders.map((item) => item.nm_id) : null;
-    };
+    if (field === "date") {
+      startCurrPeriod.value = value.split("/")[0];
+      endCurrPeriod.value = value.split("/")[1];
+    } else {
+      const findIdByFilter = (): number[] | null => {
+        const orders = allOrders.value.filter((item) => {
+          if (typeof item[field] === "string")
+            return item[field].toLowerCase().includes(value.toLowerCase());
+          return item[field]?.toString().includes(value.toLowerCase());
+        });
+        return orders.length ? orders.map((item) => item.nm_id) : null;
+      };
 
-    const filteredMetricsById = (metrics: OrderMetrics[]): OrderMetrics[] => {
-      const nm_ids = findIdByFilter();
-      if (!nm_ids) return [];
-      return metrics.filter((item) => nm_ids.includes(item.nm_id));
-    };
+      const filteredMetricsById = (metrics: OrderMetrics[]): OrderMetrics[] => {
+        const nm_ids = findIdByFilter();
+        if (!nm_ids) return [];
+        return metrics.filter((item) => nm_ids.includes(item.nm_id));
+      };
 
-    filterTotalPriceMatrics.value = filteredMetricsById(
-      totalPriceMetrics.value as OrderMetrics[]
-    );
-    filterDiscPercentMatrics.value = filteredMetricsById(
-      discPercentMetrics.value as OrderMetrics[]
-    );
-    filterSalesMatrics.value = filteredMetricsById(
-      salesMetrics.value as OrderMetrics[]
-    );
-    filterCancelMatrics.value = filteredMetricsById(
-      cancelMetrics.value as OrderMetrics[]
-    );
+      filterTotalPriceMatrics.value = filteredMetricsById(
+        totalPriceMetrics.value as OrderMetrics[]
+      );
+      filterDiscPercentMatrics.value = filteredMetricsById(
+        discPercentMetrics.value as OrderMetrics[]
+      );
+      filterSalesMatrics.value = filteredMetricsById(
+        salesMetrics.value as OrderMetrics[]
+      );
+      filterCancelMatrics.value = filteredMetricsById(
+        cancelMetrics.value as OrderMetrics[]
+      );
+    }
   };
 
   const resetFilter = (): void => goToPage(1);
-  const resetMetricsFilter = (): void => {
+  const resetMetricsFilter = async (): Promise<void> => {
     filterSelected.value = "";
     filterValue.value = "";
+    startCurrPeriod.value = getWeekAgoStr();
+    endCurrPeriod.value = getYesterdayStr();
+    await fetchAllOrders();
     filterTotalPriceMatrics.value = totalPriceMetrics.value as OrderMetrics[];
     filterDiscPercentMatrics.value = discPercentMetrics.value as OrderMetrics[];
     filterSalesMatrics.value = salesMetrics.value as OrderMetrics[];
@@ -454,6 +470,10 @@ export const useOrderStore = defineStore("order", () => {
     currentPage,
     totalPages,
     goToPage,
+    startPrevPeriod,
+    endPrevPeriod,
+    startCurrPeriod,
+    endCurrPeriod,
     filterSelected,
     filterValue,
     allArticles,
